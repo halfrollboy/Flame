@@ -1,0 +1,5 @@
+Dockerfile
+Dockerfile_auth
+env
+/log
+/tmp
