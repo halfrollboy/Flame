@@ -13,10 +13,11 @@ router_company = APIRouter(
 )
 
 
-
 # Получение всех работников
 @router_company.get("/", response_model=List[Company])
-async def list_companys(skip: int = 0, max: int = 10, companys: CompanyRepository = Depends()):
+async def list_companys(
+    skip: int = 0, max: int = 10, companys: CompanyRepository = Depends()
+):
     db_company = companys.all(skip=skip, max=max)
     return parse_obj_as(List[Company], db_company)
 
@@ -27,10 +28,7 @@ async def store_company(company: Company, companys: CompanyRepository = Depends(
     db_company = companys.find_by_email(email=company.email)
 
     if db_company:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
-        )
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     db_company = companys.create(company)
     return Company.from_orm(db_company)
@@ -38,20 +36,19 @@ async def store_company(company: Company, companys: CompanyRepository = Depends(
 
 # Получение всех работников
 @router_company.get("/ping")
-async def list_companys(skip: int = 0, max: int = 10, companys: CompanyRepository = Depends()):
+async def list_companys(
+    skip: int = 0, max: int = 10, companys: CompanyRepository = Depends()
+):
     db_company = companys.all(skip=skip, max=max)
     return parse_obj_as(List[Company], db_company)
 
 
-#Тестовое пространство получения работника
-@router_company.get("/{company_id}", response_model=Company) 
+# Тестовое пространство получения работника
+@router_company.get("/{company_id}", response_model=Company)
 async def get_company(company_id: int, companys: CompanyRepository = Depends()):
     db_company = companys.find(company_id)
 
     if db_company is None:
-        raise HTTPException(
-            status_code=404,
-            detail="company not found"
-        )
+        raise HTTPException(status_code=404, detail="company not found")
 
     return Company.from_orm(db_company)

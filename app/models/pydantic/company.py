@@ -12,10 +12,10 @@ class CompanyBase(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "name": "Flame company",
-                "phone": "89210707568",
-                "info_id": 1,
-                "email": "stiker777@mail.ru",
+                "name": "Flame2",
+                "phone": "89210707569",
+                "info_id": 2,
+                "email": "stiker777@mail.com",
                 "adress": "Soviet union",
                 "coordinate": "какие-то координаты",
             }
@@ -26,7 +26,7 @@ class Company(CompanyBase):
     id: int
 
     class Config:
-        orm_mode = True # TL;DR; помогает связать модель со схемой
+        orm_mode = True  # TL;DR; помогает связать модель со схемой
 
         schema_extra = {
             "example": {
@@ -48,7 +48,6 @@ class EmployeeBase(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-
                 "name": "Barry Allen",
                 "phone": "+79210707568",
                 "email": "barry.allen@starlabs.dc",
@@ -58,9 +57,10 @@ class EmployeeBase(BaseModel):
                 "admin": False,
             }
         }
-    
+
+
 # Пароль никогда не должен быть возвращен в ответе.
-# Для этого используется третья схема, определенная ниже. 
+# Для этого используется третья схема, определенная ниже.
 # Проверяется только запрос на создание.
 class EmployeeCreate(EmployeeBase):
     password: str
@@ -78,7 +78,7 @@ class Employee(EmployeeBase):
     id: int
 
     class Config:
-        orm_mode = True # TL;DR; помогает связать модель со схемой
+        orm_mode = True  # TL;DR; помогает связать модель со схемой
 
         schema_extra = {
             "example": {

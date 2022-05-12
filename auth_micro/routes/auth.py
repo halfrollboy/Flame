@@ -1,7 +1,9 @@
 from datetime import timedelta
-from ..models.auth import Token, User
 from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
+from ..models.pydantic.auth import Token, User
+from ..modules.auth import create_access_token, get_current_active_user, authenticate_user, fake_users_db
+from ..config import *
 
 
 router = APIRouter(
@@ -14,7 +16,8 @@ router = APIRouter(
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    user = authenticate_user(
+        fake_users_db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

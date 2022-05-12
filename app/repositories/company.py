@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 
 from ..models.postgres.pg_models import Company
 from ..db.postgres.dependencies import get_db
+
 # from ..models.pydantic.company import CompanyCreate
+from loguru import logger
 
 
 class CompanyRepository:
@@ -39,12 +41,11 @@ class CompanyRepository:
             email=company.email,
             info_id=company.info_id,
             adress=company.adress,
-            coordinate=company.coordinate
+            coordinate=company.coordinate,
         )
-
 
         self.db.add(db_company)
         self.db.commit()
         self.db.refresh(db_company)
-        
+        logger.debug(f"company {db_company}")
         return db_company

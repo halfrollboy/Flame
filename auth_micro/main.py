@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes.auth import router
+from .routes.auth import router
 import uvicorn
 
 

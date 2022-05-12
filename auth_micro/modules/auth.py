@@ -1,18 +1,15 @@
 from datetime import datetime, timedelta
-from os import environ
-from ..models.auth import TokenData, User, UserInDB
+from ..models.pydantic.auth import TokenData, User, UserInDB
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-
+from ..config import *
+from ..repositories.user import UserRepository
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-SECRET_KEY=environ["SECRET_KEY"]
-ALGORITHM=environ["ALGORITHM"]
 
 
 fake_users_db = {
@@ -32,6 +29,10 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+
+
+def get_db_user(username,db: UserRepository=Depends()):
+    pass
 
 
 def get_user(db, username: str):
@@ -81,6 +82,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    print("fff")
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

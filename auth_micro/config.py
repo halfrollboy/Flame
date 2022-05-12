@@ -1,0 +1,5 @@
+from os import environ
+
+SECRET_KEY=environ.get("SECRET_KEY")
+ALGORITHM=environ.get("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES=environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")

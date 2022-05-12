@@ -1,14 +1,17 @@
 # from typing import Optional
 import uvicorn
 from fastapi import Depends, FastAPI
+
 # from pydantic import BaseModel
 # from models.pydantic.order import Item
 from .db.postgres.database import Model, engine
 from .routes.employee import router_employee
 from .routes.company import router_company
+from .routes.user import router_user
 from fastapi.security import OAuth2PasswordBearer
-import os
 
+# import os
+from loguru import logger
 
 Model.metadata.create_all(bind=engine)
 
@@ -16,8 +19,10 @@ Model.metadata.create_all(bind=engine)
 app = FastAPI()
 app.include_router(router_employee)
 app.include_router(router_company)
+app.include_router(router_user)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=os.environ["APP_TOKEN"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+logger.add("logs/logs.log", level="DEBUG", retention="10 days", rotation="00:00")
 
 
 @app.get("/")
@@ -35,7 +40,8 @@ async def read_items(token: str = Depends(oauth2_scheme)):
     return {
         "Hello": "World",
         "token": token,
-        }
+    }
+
 
 # @app.get("/items/{item_id}")
 # def update_item(item_id: int, item: Item):

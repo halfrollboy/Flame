@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from ..models.postgres.pg_models import Employee, Company
 from ..db.postgres.dependencies import get_db
 from ..models.pydantic.company import EmployeeCreate
+from loguru import logger
 
 
 class EmployeeRepository:
@@ -28,11 +29,13 @@ class EmployeeRepository:
         """Получить всех пользователей"""
         query = self.db.query(Employee)
         return query.offset(skip).limit(max).all()
-    
+
     # Постараться создавать изначально компанию, а потом пользователя
-    def add_company(self,id: int, company: Company) -> Employee:
+    def add_company(self, id: int, company: Company) -> Employee:
         """Добавление работника в комапнию"""
-        self.db.query(Employee).filter(Employee.id == id).update({'company_id': company.id})
+        self.db.query(Employee).filter(Employee.id == id).update(
+            {"company_id": company.id}
+        )
         self.db.commit()
 
     def create(self, employee: EmployeeCreate) -> Employee:
@@ -56,17 +59,17 @@ class EmployeeRepository:
             self.db.refresh(db_employee)
         except:
             {"error": employee}
-        
+        logger.debug(f"db_employe:{db_employee}, employe:{employee}")
         return db_employee
 
 
 # def create(self, speedster: SpeedsterCreate) -> Speedster:
 #     speedster.password += "__you_must_hash_me"
-    
+
 #     db_speedster = Speedster(**speedster.dict())
 
 #     self.db.add(db_speedster)
 #     self.db.commit()
-#     self.db.refresh(db_speedster)    
+#     self.db.refresh(db_speedster)
 
 #     return db_speedster
