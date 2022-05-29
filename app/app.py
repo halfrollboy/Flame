@@ -1,6 +1,6 @@
 # from typing import Optional
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 
 # from pydantic import BaseModel
 # from models.pydantic.order import Item
@@ -8,7 +8,8 @@ from .db.postgres.database import Model, engine
 from .routes.employee import router_employee
 from .routes.company import router_company
 from .routes.user import router_user
-from fastapi.security import OAuth2PasswordBearer
+from .modules.auth.auth import get_auth
+from starlette_exporter import PrometheusMiddleware, handle_metrics
 
 # import os
 from loguru import logger
@@ -20,8 +21,9 @@ app = FastAPI()
 app.include_router(router_employee)
 app.include_router(router_company)
 app.include_router(router_user)
+app.add_middleware(PrometheusMiddleware)
+app.add_route("/metrics", handle_metrics)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 logger.add("logs/logs.log", level="DEBUG", retention="10 days", rotation="00:00")
 
 
@@ -35,12 +37,9 @@ async def read_root():
     return {"ping": "pong!"}
 
 
-@app.get("/auth")
-async def read_items(token: str = Depends(oauth2_scheme)):
-    return {
-        "Hello": "World",
-        "token": token,
-    }
+@router_user.get("/token")
+async def get_token():
+    return f"{get_auth()}"
 
 
 # @app.get("/items/{item_id}")

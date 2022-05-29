@@ -28,18 +28,16 @@ services:
     env_file:
       - .env
     volumes:
-        - ./app:/code/app
-      
-    
+      - ./app:/code/app
 
   # redis_db:
   #   image: redis:6.2.6-alpine
   #   ports:
   #     - 6379:6379
-    
+
 
   mongodb:
-    image : mongo:4.4.7-focal
+    image: mongo:4.4.7-focal
     container_name: mongodb
     environment:
       - PUID=1000
@@ -53,7 +51,6 @@ services:
       retries: 5
       start_period: 30s
 
-
   db:
     container_name: pg_container
     image: postgres:13.3-alpine
@@ -65,11 +62,10 @@ services:
     ports:
       - ${PG_PORT}:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
-
 
   pgadmin:
     container_name: pgadmin4_container
@@ -82,3 +78,97 @@ services:
       - "5050:80"
     depends_on:
       - db
+
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:latest
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   ports:
+  #     - 22181:2181
+
+  # kafka:
+  #   image: confluentinc/cp-kafka:latest
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - 29092:29092
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  prometheus:
+    image: quay.io/prometheus/prometheus:${PROMETHEUS_VERSION}
+    ports:
+      - ${PROMETHEUS_PORT}:9090
+    volumes:
+      - ./prometheusconfig/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION}
+    user: root
+    restart: unless-stopped
+    container_name: grafana
+    ports:
+      - ${GRAFANA_PORT}:3000
+    volumes:
+      - ./grafana-data/data:/var/lib/grafana
+      - ./grafana-data/certs:/certs
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+  # kafka:
+  #    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+  #    depends_on:
+  #      - zookeeper
+  #    ports:
+  #      - ${KAFKA_PORT}:9092
+  #      - ${KAFKA_LOCALHOST_PORT}:9093
+  #    environment:
+  #      KAFKA_BROKER_ID: 1
+  #      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,PLAINTEXT://0.0.0.0:9093
+  #      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+  #      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,PLAINTEXT://localhost:9093
+  #      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  #      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  #      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+  #      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #      KAFKA_MESSAGE_MAX_BYTES: 10485760
+  #      KAFKA_SOCKET_REQUEST_MAX_BYTES: 100001200
+  #    restart: always
+  #    volumes:
+  #      - ./kafka-data:/var/lib/kafka/data
+
+  #  zookeeper:
+  #    image: zookeeper:${ZK_VERSION}
+  #    ports:
+  #      - ${ZK_PORT}:2181
+  #    restart: always
+  #    volumes:
+  #      - ./zk-data:/var/lib/zookeeper/data \
+  #      - ./zk-txn-logs:/var/lib/zookeeper/log \
+
+  #  kafka-actualizer:
+  #    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+  #    depends_on:
+  #      - kafka
+  #    volumes:
+  #      - ./docker/wait-for-it.sh:/wait-for-it.sh
+  #    command: |
+  #      bash -c '/wait-for-it.sh --timeout=0 -s kafka:9092 && \
+  #      kafka-topics --create --if-not-exists --topic src-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
+  #      kafka-topics --create --if-not-exists --topic processed-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
+  #      kafka-topics --create --if-not-exists --topic aggregated-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
+  #      exit 0'
+  #    environment:
+  #      KAFKA_BROKER_ID: ignored
+  #      KAFKA_ZOOKEEPER_CONNECT: ignored

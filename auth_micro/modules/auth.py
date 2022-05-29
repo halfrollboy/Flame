@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from ..models.pydantic.auth import TokenData, User, UserInDB
+from ..models.pydantic.auth import TokenData
+from ..models.pydantic.user import User, UserInDB
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -31,7 +32,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_db_user(username,db: UserRepository=Depends()):
+def get_db_user(username, db: UserRepository = Depends()):
     pass
 
 

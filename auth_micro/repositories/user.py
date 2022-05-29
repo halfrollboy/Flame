@@ -9,12 +9,13 @@ from app.models.pydantic.user import UserCreate
 
 from ..models.postgres.pg_models import User
 from ..db.postgres.dependencies import get_db
-from ..models.pydantic.company import User
+from ..models.pydantic.user import User
 
 from passlib.context import CryptContext
 from loguru import logger
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class UserRepository:
     def __init__(self, db: Session = Depends(get_db)):
@@ -36,7 +37,7 @@ class UserRepository:
         query = self.db.query(User)
         return query.filter(User.email == email).first()
 
-    # def all(self, skip: int = 0, max: int = 100) -> List[User]:
-    #     """Получить всех пользователей"""
-    #     query = self.db.query(User)
-    #     return query.offset(skip).limit(max).all()
+    def all(self, skip: int = 0, max: int = 100) -> List[User]:
+        """Получить всех пользователей"""
+        query = self.db.query(User)
+        return query.offset(skip).limit(max).all()
