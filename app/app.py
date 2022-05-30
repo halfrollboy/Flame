@@ -1,6 +1,7 @@
 # from typing import Optional
 import uvicorn
 from fastapi import FastAPI
+import asyncio
 
 # from pydantic import BaseModel
 # from models.pydantic.order import Item
@@ -8,6 +9,7 @@ from .db.postgres.database import Model, engine
 from .routes.employee import router_employee
 from .routes.company import router_company
 from .routes.user import router_user
+from .routes import kafka_exemple
 from .modules.auth.auth import get_auth
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
@@ -21,6 +23,12 @@ app = FastAPI()
 app.include_router(router_employee)
 app.include_router(router_company)
 app.include_router(router_user)
+
+# Проба кафки
+app.include_router(kafka_exemple.router_kafka)
+asyncio.create_task(kafka_exemple.consume())
+
+# Настройка мидвэира для прометеуса
 app.add_middleware(PrometheusMiddleware)
 app.add_route("/metrics", handle_metrics)
 
